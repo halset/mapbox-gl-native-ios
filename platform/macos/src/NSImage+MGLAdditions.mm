@@ -83,7 +83,9 @@ BOOL MGLEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
 
 - (mbgl::PremultipliedImage)mgl_premultipliedImage {
     CGImageRef ref = [self CGImageForProposedRect:nullptr context:nullptr hints:nullptr];
-    return MGLPremultipliedImageFromCGImage(ref);
+    mbgl::PremultipliedImage premultipliedImage = MGLPremultipliedImageFromCGImage(ref);
+    CGImageRelease(ref);
+    return premultipliedImage;
 }
 
 @end

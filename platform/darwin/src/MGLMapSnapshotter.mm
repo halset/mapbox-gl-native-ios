@@ -346,6 +346,7 @@ private:
                 strongSelf = nil;
             });
         } else {
+            @autoreleasepool {
 #if TARGET_OS_IPHONE
             MGLImage *mglImage = [[MGLImage alloc] initWithMGLPremultipliedImage:std::move(image) scale:options.scale];
 #else
@@ -368,6 +369,7 @@ private:
                     strongSelf = nil;
                 });
             });
+            }
         }
     });
 }
@@ -432,11 +434,11 @@ MGLImage *MGLAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
     UIImage *attributionImage = [UIImage imageWithCGImage:attributionImageRef];
     CGImageRelease(attributionImageRef);
     
-    CIImage *ciAttributionImage = [[CIImage alloc] initWithCGImage:attributionImage.CGImage];
-    
-    UIImage *blurredAttributionBackground = [MGLMapSnapshotter blurredAttributionBackground:ciAttributionImage];
-    
-    [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
+    if (attributionImage) {
+        CIImage *ciAttributionImage = [[CIImage alloc] initWithCGImage:attributionImage.CGImage];
+        UIImage *blurredAttributionBackground = [MGLMapSnapshotter blurredAttributionBackground:ciAttributionImage];
+        [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
+    }
     
     [MGLMapSnapshotter drawAttributionTextWithStyle:attributionInfoStyle origin:attributionTextPosition attributionInfo:attributionInfo];
     
@@ -478,12 +480,10 @@ MGLImage *MGLAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
     CGPoint attributionTextPosition = CGPointMake(attributionBackgroundFrame.origin.x + 10,
                                                   logoImageRect.origin.y + (logoImageRect.size.height / 2) - (attributionBackgroundSize.height / 2));
     
-    
-    NSImage *compositedImage = nil;
     NSImageRep *sourceImageRep = [sourceImage bestRepresentationForRect:targetFrame
                                                                 context:nil
                                                                   hints:nil];
-    compositedImage = [[NSImage alloc] initWithSize:targetFrame.size];
+    NSImage *compositedImage = [[NSImage alloc] initWithSize:targetFrame.size];
     
     [compositedImage lockFocus];
     
@@ -504,11 +504,11 @@ MGLImage *MGLAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
     
     NSBitmapImageRep *attributionBackground = [[NSBitmapImageRep alloc] initWithFocusedViewRect:attributionBackgroundFrame];
     
-    CIImage *attributionBackgroundImage = [[CIImage alloc] initWithCGImage:[attributionBackground CGImage]];
-    
-    NSImage *blurredAttributionBackground = [MGLMapSnapshotter blurredAttributionBackground:attributionBackgroundImage];
-    
-    [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
+    if (attributionBackground) {
+        CIImage *attributionBackgroundImage = [[CIImage alloc] initWithCGImage:[attributionBackground CGImage]];
+        NSImage *blurredAttributionBackground = [MGLMapSnapshotter blurredAttributionBackground:attributionBackgroundImage];
+        [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
+    }
     
     [MGLMapSnapshotter drawAttributionTextWithStyle:attributionInfoStyle origin:attributionTextPosition attributionInfo:attributionInfo];
     
